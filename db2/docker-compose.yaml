@@ -1,0 +1,44 @@
+version: '3.3'
+
+services:
+  db2:
+    image: ibmcom/db2:11.5.0.0
+    container_name: db2-db
+    ports:
+      - 50000:50000
+    volumes:
+      - ~/apps/db2:/database
+    environment:
+      - LICENSE=accept
+      - DB2INST1_PASSWORD=example
+      - DBNAME=FOO_DB
+    command: db2start
+
+
+# docker run -itd --name db2 --privileged=true -p 50000:50000 -e LICENSE=accept -e DB2INST1_PASSWORD=db2inst1 -e DBNAME=test -v /home/ubuntu/DB2:/database ibmcom/db2
+
+# sudo docker exec -i -t db2 /bin/bash
+
+# su - db2inst1
+
+# db2start
+
+# db2 
+
+# LIST DATABASE DIRECTORY
+
+# create database testdb
+
+# connect to testdb user db2inst1 using db2inst1 
+
+# list tables
+
+# CREATE TABLE principal_table (id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, name VARCHAR(100) NOT NULL, description VARCHAR(255))
+# CREATE TABLE secondary_table_1 (id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, principal_id INT NOT NULL, value VARCHAR(100) NOT NULL, FOREIGN KEY (principal_id) REFERENCES principal_table (id))
+# CREATE TABLE secondary_table_2 (id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, principal_id INT NOT NULL, details VARCHAR(255), FOREIGN KEY (principal_id) REFERENCES principal_table (id))
+
+# INSERT INTO principal_table (name, description) VALUES ('Principal Record 1', 'This is the main record')
+# INSERT INTO secondary_table_1 (principal_id, value) VALUES (1, 'Secondary 1 Value')
+# INSERT INTO secondary_table_2 (principal_id, details) VALUES (1, 'Details for Secondary 2')
+
+# SELECT * FROM PRINCIPAL_TABLE

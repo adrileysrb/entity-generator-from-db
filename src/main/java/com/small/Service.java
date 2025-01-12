@@ -33,10 +33,10 @@ public class Service {
         // }
 
         try {
-            var results = repository.getPrimaryKeyColumns("parent_table");
-            var results2 = repository.getTablesUsingId("parent_table", "id");
-            var message = repository.checkIdUsage((short) 1, results2);
-            System.err.println(message);
+            var result = repository.getColumnsMetaData("PRINCIPAL_TABLE");
+            System.out.println(result);
+
+
         } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
