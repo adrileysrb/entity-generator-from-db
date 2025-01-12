@@ -33,9 +33,22 @@ public class Service {
         // }
 
         try {
-            var result = repository.getColumnsMetaData("PRINCIPAL_TABLE");
-            System.out.println(result);
+            // var result = repository.getColumnsMetaData("PRINCIPAL_TABLE");
+            // System.out.println(result);
 
+            // var result2 = repository.getPrimaryKeyColumns("PRINCIPAL_TABLE");
+            // System.out.println(result2);
+
+            var result3 = repository.getTablesUsingId("PRINCIPAL_TABLE", "ID");
+            // System.out.println(result3);
+
+            // var result4 = repository.getRelatedTables("PRINCIPAL_TABLE");
+            // System.out.println(result4);
+
+            var result5 = repository.checkIdUsage((short) 1, result3);
+            System.out.println(result5);
+
+            
 
         } catch (Exception e) {
             // TODO Auto-generated catch block

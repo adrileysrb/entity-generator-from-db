@@ -71,67 +71,59 @@ public class Repository {
         return tables;
     }
 
-    // public List<String> getRelatedTables(String parentTableName) {
-    // List<String> relatedTables = new ArrayList<>();
+    public List<String> getRelatedTables(String parentTableName) {
+        List<String> relatedTables = new ArrayList<>();
 
-    // try (Connection connection = dataSource.getConnection()) {
-    // DatabaseMetaData databaseMetaData = connection.getMetaData();
-    // ResultSet resultSet = databaseMetaData.getImportedKeys(null, null,
-    // parentTableName);
-    // while (resultSet.next()) {
-    // String childTableName = resultSet.getString("FKTABLE_NAME");
-    // relatedTables.add(childTableName);
-    // }
-    // } catch (SQLException e) {
-    // e.printStackTrace();
-    // }
-
-    // return relatedTables;
-    // }
-
-    public List<TableUsingId> getTablesUsingId(String parentTableName, String idColumnName) {
-        List<TableUsingId> relatedTables = new ArrayList<>();
-
-        // String query = "SELECT kcu.table_name, kcu.column_name " +
-        // "FROM information_schema.key_column_usage kcu " +
-        // "JOIN information_schema.constraint_column_usage ccu " +
-        // "ON kcu.constraint_name = ccu.constraint_name " +
-        // "WHERE ccu.table_name = ? AND ccu.column_name = ?";
-
-        String query = "SELECT kcu.table_name, MAX(kcu.column_name) AS column_name " +
-                "FROM information_schema.key_column_usage kcu " +
-                "JOIN information_schema.constraint_column_usage ccu " +
-                "ON kcu.constraint_name = ccu.constraint_name " +
-                "WHERE ccu.table_name = ? AND ccu.column_name = ? " +
-                "GROUP BY kcu.table_name";
-
+        String query = "SELECT TABNAME " +
+                "FROM SYSCAT.REFERENCES " +
+                "WHERE REFTABNAME = ?";
+    
         try (Connection connection = dataSource.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-
-            preparedStatement.setString(1, parentTableName);
-            preparedStatement.setString(2, idColumnName);
-
+    
+            preparedStatement.setString(1, parentTableName.toUpperCase());
+    
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
-                    String childTableName = resultSet.getString("table_name");
-                    String childColumnName = resultSet.getString("column_name");
-                    TableUsingId tableUsingId = new TableUsingId();
-                    tableUsingId.childTableName = childTableName;
-                    tableUsingId.childColumnName = childColumnName;
-                    System.out.println("getTablesUsingId: " + tableUsingId);
-                    relatedTables.add(tableUsingId);
+                    String childTableName = resultSet.getString("TABNAME");
+                    relatedTables.add(childTableName);
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    
+        return relatedTables;
+    }
 
-        Iterator<TableUsingId> iterator = relatedTables.iterator();
-        while (iterator.hasNext()) {
-            TableUsingId item = iterator.next();
-            if (item.getChildTableName().equals(parentTableName)) {
-                iterator.remove();
+    public List<TableUsingId> getTablesUsingId(String parentTableName, String idColumnName) {
+        List<TableUsingId> relatedTables = new ArrayList<>();
+
+        String query = "SELECT r.tabname, k.colname " +
+                "FROM syscat.references r " +
+                "JOIN syscat.keycoluse k ON r.constname = k.constname " +
+                "WHERE r.reftabname = ? " +
+                "AND r.refkeyname = (SELECT constname FROM syscat.keycoluse WHERE tabname = ? AND colname = ?)";
+
+        try (Connection connection = dataSource.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+
+            preparedStatement.setString(1, parentTableName.toUpperCase());
+            preparedStatement.setString(2, parentTableName.toUpperCase());
+            preparedStatement.setString(3, idColumnName.toUpperCase());
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    String childTableName = resultSet.getString("tabname");
+                    String childColumnName = resultSet.getString("colname");
+                    TableUsingId tableUsingId = new TableUsingId();
+                    tableUsingId.childTableName = childTableName;
+                    tableUsingId.childColumnName = childColumnName;
+                    relatedTables.add(tableUsingId);
+                }
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
 
         return relatedTables;
@@ -141,20 +133,20 @@ public class Repository {
 
         List<String> primaryKeyColumns = new ArrayList<>();
 
-        String query = "SELECT kcu.column_name " +
-                "FROM information_schema.table_constraints tc " +
-                "JOIN information_schema.key_column_usage kcu " +
-                "ON tc.constraint_name = kcu.constraint_name " +
-                "WHERE tc.table_name = ? AND tc.constraint_type = 'PRIMARY KEY'";
+        String query = "SELECT colname " +
+                "FROM syscat.keycoluse kcu " +
+                "JOIN syscat.tabconst tc ON kcu.constname = tc.constname " +
+                "WHERE tc.tabname = ? AND tc.type = 'P'";
 
         try (Connection connection = dataSource.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
-            preparedStatement.setString(1, tableName);
+            preparedStatement.setString(1, tableName.toUpperCase());
 
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
-                    String columnName = resultSet.getString("column_name");
+                    // String columnName = resultSet.getString("column_name");
+                    String columnName = resultSet.getString("colname");
                     System.out.println(columnName);
                     primaryKeyColumns.add(columnName);
                 }

@@ -42,3 +42,8 @@ services:
 # INSERT INTO secondary_table_2 (principal_id, details) VALUES (1, 'Details for Secondary 2')
 
 # SELECT * FROM PRINCIPAL_TABLE
+
+SELECT fk.tabname AS table_name, fk.colname AS column_name FROM syscat.keycoluse fk JOIN syscat.keycoluse pk ON fk.constname = pk.constname JOIN syscat.tabconst tc ON pk.constname = tc.constname WHERE tc.enforced = 'Y' AND pk.tabname = 'PRINCIPAL_TABLE' AND pk.colname = 'ID' AND fk.tabname <> pk.tabname
+
+
+SELECT fk.tabname AS table_name, fk.colname AS column_name FROM syscat.keycoluse fk JOIN syscat.tabconst tc ON fk.constname = tc.constname WHERE tc.enforced = 'Y' AND tc.type = 'F' AND tc.tabname = 'PRINCIPAL_TABLE' AND tc.tabname = 'ID'
