@@ -2,62 +2,42 @@ package com.small.util;
 
 public class StringUtil {
 
-    /**
-     * Converte strings com underline para camelCase.
-     * Exemplo: "first_name" -> "firstName"
-     *
-     * @param input a string no formato com underline
-     * @return a string convertida para camelCase
-     */
     public static String toCamelCase(String input) {
         if (input == null || input.isEmpty()) {
             return input;
         }
 
-        StringBuilder result = new StringBuilder();
+        StringBuilder camelCaseString = new StringBuilder();
         boolean capitalizeNext = false;
 
-        for (char ch : input.toCharArray()) {
-            if (ch == '_') {
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            if (c == '_' || c == '-' || c == ' ') {
                 capitalizeNext = true;
             } else if (capitalizeNext) {
-                result.append(Character.toUpperCase(ch));
+                camelCaseString.append(Character.toUpperCase(c));
                 capitalizeNext = false;
             } else {
-                result.append(ch);
+                camelCaseString.append(Character.toLowerCase(c));
             }
         }
 
-        return result.toString();
+        return camelCaseString.toString();
     }
 
-    /**
-     * Converte strings com underline ou letras minúsculas para o formato
-     * PascalCase.
-     * Exemplo: "t_person" -> "TPerson"
-     *
-     * @param input a string original (ex.: nome da tabela)
-     * @return a string formatada para o padrão PascalCase
-     */
     public static String toPascalCase(String input) {
         if (input == null || input.isEmpty()) {
             return input;
         }
 
-        StringBuilder result = new StringBuilder();
-        boolean capitalizeNext = true;
+        String camelCase = toCamelCase(input);
+        return capitalizeFirstLetter(camelCase);
+    }
 
-        for (char ch : input.toCharArray()) {
-            if (ch == '_') {
-                capitalizeNext = true; // Próxima letra será maiúscula
-            } else if (capitalizeNext) {
-                result.append(Character.toUpperCase(ch));
-                capitalizeNext = false;
-            } else {
-                result.append(Character.toLowerCase(ch));
-            }
+    private static String capitalizeFirstLetter(String str) {
+        if (str == null || str.isEmpty()) {
+            return str;
         }
-
-        return result.toString();
+        return str.substring(0, 1).toUpperCase() + str.substring(1);
     }
 }
